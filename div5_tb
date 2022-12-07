@@ -1,0 +1,123 @@
+LIBRARY IEEE;
+USE IEEE.STD_LOGIC_1164.ALL;
+
+ENTITY div_by_5_tb IS
+	-- Port ();
+END div_by_5_tb;
+
+ARCHITECTURE Behavioral OF div_by_5_tb IS
+	COMPONENT div_by_5 IS
+		PORT (
+			rst, clk, din : IN std_logic;
+			dout : OUT std_logic
+		);
+	END COMPONENT div_by_5;
+
+	SIGNAL rst, din : std_logic;
+	SIGNAL clk : std_logic := '0';
+	SIGNAL dout : std_logic;
+	CONSTANT clk_period : TIME := 10ns;
+
+	CONSTANT test15 : std_logic_vector(0 TO 3) := "1111"; -- dout='1', finish in S0
+	CONSTANT test186 : std_logic_vector(0 TO 7) := B"1011_1010"; -- dout='0', finish in S1
+	CONSTANT test487 : std_logic_vector(0 TO 8) := B"1_1110_0111"; -- dout='0', finish in S2
+	CONSTANT test968 : std_logic_vector(0 TO 9) := B"11_1100_1000"; -- dout='0', finish in S3
+	CONSTANT test1139 : std_logic_vector(0 TO 10) := B"100_0111_0011"; -- dout='0', finish in S4
+	CONSTANT test1355 : std_logic_vector(0 TO 10) := B"101_0100_1011"; -- dout='1', finish in S0
+
+BEGIN
+	UUT : div_by_5
+	PORT MAP(rst => rst, clk => clk, din => din, dout => dout);
+
+	clk_process : PROCESS (clk)
+	BEGIN
+		clk <= NOT clk AFTER clk_period/2;
+	END PROCESS;
+
+	st : PROCESS
+	BEGIN
+		din <= '0';
+		rst <= '1', '0' AFTER clk_period; 
+		WAIT UNTIL rst'EVENT AND rst = '0';
+		FOR i IN 0 TO 3 LOOP
+			WAIT UNTIL clk'EVENT AND clk = '1';
+			din <= test15(i); 
+		END LOOP;
+		WAIT UNTIL clk'EVENT AND clk = '1';
+		WAIT UNTIL clk'EVENT AND clk = '0'; 
+		ASSERT dout = '1'
+		REPORT "Wrong result FOR 15."
+			SEVERITY failure;
+
+			din <= '0';
+			rst <= '1', '0' AFTER clk_period;
+			WAIT UNTIL rst'EVENT AND rst = '0';
+			FOR i IN 0 TO 7 LOOP
+				WAIT UNTIL clk'EVENT AND clk = '1';
+				din <= test186(i);
+			END LOOP;
+			WAIT UNTIL clk'EVENT AND clk = '1';
+			WAIT UNTIL clk'EVENT AND clk = '0';
+			ASSERT dout = '1'
+			REPORT "Wrong result FOR 186"
+				SEVERITY failure;
+
+				din <= '0';
+				rst <= '1', '0' AFTER clk_period;
+				WAIT UNTIL rst'EVENT AND rst = '0';
+				FOR i IN 0 TO 8 LOOP
+					WAIT UNTIL clk'EVENT AND clk = '1';
+					din <= test487(i);
+				END LOOP;
+				WAIT UNTIL clk'EVENT AND clk = '1';
+				WAIT UNTIL clk'EVENT AND clk = '0';
+				ASSERT dout = '1'
+				REPORT "wrong result FOR 487"
+					SEVERITY failure;
+
+					din <= '0';
+					rst <= '1', '0' AFTER clk_period; 
+					WAIT UNTIL rst'EVENT AND rst = '0';
+					FOR i IN 0 TO 9 LOOP
+						WAIT UNTIL clk'EVENT AND clk = '1';
+						din <= test968(i); 
+					END LOOP;
+					WAIT UNTIL clk'EVENT AND clk = '1';
+					WAIT UNTIL clk'EVENT AND clk = '0'; 
+					ASSERT dout = '0'
+					REPORT "Wrong result FOR 968."
+						SEVERITY failure;
+
+						din <= '0';
+						rst <= '1', '0' AFTER clk_period; 
+						WAIT UNTIL rst'EVENT AND rst = '0';
+						FOR i IN 0 TO 10 LOOP
+							WAIT UNTIL clk'EVENT AND clk = '1';
+							din <= test1139(i); 
+						END LOOP;
+						WAIT UNTIL clk'EVENT AND clk = '1';
+						WAIT UNTIL clk'EVENT AND clk = '0'; 
+						ASSERT dout = '0'
+						REPORT "Wrong result FOR 1139."
+							SEVERITY failure;
+
+							din <= '0';
+							rst <= '1', '0' AFTER clk_period; 
+							WAIT UNTIL rst'EVENT AND rst = '0';
+
+							FOR i IN 0 TO 10 LOOP
+								WAIT UNTIL clk'EVENT AND clk = '1';
+								din <= test1355(i); 
+							END LOOP;
+							WAIT UNTIL clk'EVENT AND clk = '1';
+							WAIT UNTIL clk'EVENT AND clk = '0'; 
+							ASSERT dout = '1'
+							REPORT "Wrong result FOR 1355."
+								SEVERITY failure;
+
+								REPORT "Simulation PASSED";
+								WAIT;
+
+	END PROCESS;
+
+END Behavioral;
