@@ -1,0 +1,43 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+
+-- Uncomment the following library declaration if using
+-- arithmetic functions with Signed or Unsigned values
+--use IEEE.NUMERIC_STD.ALL;
+
+-- Uncomment the following library declaration if instantiating
+-- any Xilinx leaf cells in this code.
+--library UNISIM;
+--use UNISIM.VComponents.all;
+
+entity johnson_counter is
+    generic(width : positive := 4);
+    Port ( clk, clear : in STD_LOGIC;
+           Q : out STD_LOGIC_VECTOR (width-1 downto 0));
+end johnson_counter;
+
+architecture Behavioral of johnson_counter is
+
+    component dff is
+        Port ( clk, rst : in STD_LOGIC;
+               d : in STD_LOGIC;
+               q : out STD_LOGIC);
+    end component dff;
+
+    signal iQ : std_logic_vector(width-1 downto 0);
+    signal notQ : std_logic;
+begin
+
+    Q <= iQ;
+    notQ <= not iQ(width-1);
+
+    JC : for i in 0 to width-1 generate
+        JC0 : if i = 0 generate
+            DFF0 : dff port map (clk => clk, rst => clear, d =>  notQ, q => iQ(0));
+        end generate;
+        JCi : if i > 0 generate
+            DFFi : dff port map (clk => clk, rst => clear, d =>  iQ(i-1), q => iQ(i));
+        end generate;                
+    end generate;
+    
+end Behavioral;
